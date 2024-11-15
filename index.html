@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lab 10</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+            background-image: url(background6.jpg);
+            background-size: cover;
+        }
+        #game-container {
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            background: rgba(46, 46, 46, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #555;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+        #game-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #b642f5;
+            margin-bottom: 15px;
+        }
+        #attempt-info {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+        #name-input {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: calc(100% - 16px); 
+        }
+        #generate-btn {
+            background-color: #b642f5;
+            color: #2e2e2e;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        #generate-btn:hover {
+            background-color: #b642f5;
+            transform: scale(1.05);
+        }
+        #slot-machine {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            gap: 10px;
+        }
+        .column {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 250px;
+            width: 100px;
+            border: 4px solid #444;
+            border-radius: 10px;
+            position: relative;
+            visibility: hidden;
+        }
+        .column img {
+            width: 80px;
+            height: 80px;
+            margin: 5px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+            transition: transform 0.5s ease;
+        }
+
+        @media (max-width: 480px) {
+            #game-title {
+                font-size: 20px;
+            }
+            #generate-btn {
+                font-size: 16px;
+                padding: 10px;
+            }
+            .column img {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="game-title">Слот-машина</div>
+        <input type="text" id="name-input" placeholder="Введіть ваше ім'я" />
+        <div id="attempt-info">Спроба 1 з 3</div>
+        <button id="generate-btn">Генерувати</button>
+        <div id="slot-machine">
+            <div class="column" id="col-1"></div>
+            <div class="column" id="col-2"></div>
+            <div class="column" id="col-3"></div>
+        </div>
+    </div>
+
+    <script>
+        const images = [
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMXmK_0HyIUUe3rPFiAvSJnWvYtpP5b778Bw&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCNE1esQiSSK6OgKH5aq3moPOr58hiaRy-Ww&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTMAvgwR5zkFsUG3Jp7V0hI8lJwWgW4AUPRg&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHx3Mn2SQgBtZAbYEDh2hq7H1ksXUTi0Uj6g&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRpMqaUDGM1n8h8zJbrgpW7Ti7U8dI4-Df8gg&s'
+        ];
+
+        let attempts = 0;
+        let userName = '';
+
+        function spinColumn(column) {
+            const totalImages = images.length;
+            column.innerHTML = '';
+
+
+           
+            for (let i = 0; i < 5; i++) {
+                const img = document.createElement('img');
+                img.src = images[Math.floor(Math.random() * totalImages)];
+                column.appendChild(img);
+            }
+
+           
+            column.style.transition = 'transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+            column.style.transform = 'rotateX(720deg)'; 
+
+            setTimeout(() => {
+                column.style.transition = 'none';
+                column.style.transform = 'rotateX(0)'; 
+                column.innerHTML = ''; 
+
+                
+                for (let i = 0; i < 3; i++) {
+                    const img = document.createElement('img');
+                    img.src = images[Math.floor(Math.random() * totalImages)];
+                    column.appendChild(img);
+                }
+            }, 1000); 
+        }
+
+        function generateImages() {
+            const nameInput = document.getElementById('name-input');
+            userName = nameInput.value.trim(); 
+
+            if (!userName) {
+                alert("Будь ласка, введіть своє ім'я.");
+                return; 
+            }
+
+            attempts++;
+            document.getElementById('attempt-info').innerText = `Спроба ${attempts} з 3`;
+            if (attempts > 3) {
+                alert(`${userName}, гра завершена. Ви програли!`);
+                resetGame();
+                return;
+            }
+
+            const columns = [
+                document.getElementById('col-1'),
+                document.getElementById('col-2'),
+                document.getElementById('col-3')
+            ];
+
+            columns.forEach((column, index) => {
+                column.style.visibility = 'visible';
+                setTimeout(() => spinColumn(column), index * 300); 
+            });
+
+            setTimeout(checkWin, 1500); 
+        }
+
+        function checkWin() {
+            const middleImages = [
+                document.getElementById('col-1').children[1]?.src,
+                document.getElementById('col-2').children[1]?.src,
+                document.getElementById('col-3').children[1]?.src
+            ];
+
+            const win = middleImages.every(src => src && src === middleImages[0]);
+
+            if (win) {
+                alert(`Вітаємо, ${userName}! Ви виграли!`);
+                resetGame();
+            } else if (attempts === 3) {
+                alert(`Спроби закінчились, ${userName}. Ви програли!`);
+                resetGame();
+            }
+        }
+
+        function resetGame() {
+            attempts = 0;
+            document.getElementById('attempt-info').innerText = "Спроба 1 з 3";
+            const columns = [1, 2, 3].map(col => document.getElementById(`col-${col}`));
+            columns.forEach(col => {
+                col.innerHTML = '';
+                col.style.visibility = 'hidden';
+            });
+        }
+
+        document.getElementById('generate-btn').addEventListener('click', generateImages);
+    </script>
+</body>
+</html>
